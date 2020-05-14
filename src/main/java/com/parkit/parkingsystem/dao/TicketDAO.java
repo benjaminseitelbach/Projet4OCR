@@ -26,7 +26,9 @@ public class TicketDAO {
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
             //ps.setInt(1,ticket.getId());
-            ps.setInt(1,ticket.getParkingSpot().getId());
+            //ps.setInt(1,ticket.getParkingSpot().getId());
+            System.out.println("ID avant save:" + ticket.getId());
+            ps.setInt(1,ticket.getId());
             ps.setString(2, ticket.getVehicleRegNumber());
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().getTime()));
@@ -85,5 +87,32 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+    
+    public int getVehicleRegNumberCount(String vehicleRegNumber) {
+    	System.out.println("Début fonction pour compter");
+    	Connection con = null;
+        //Ticket ticket = null;
+        int count = 0;
+        try {
+           con = dataBaseConfig.getConnection();
+           PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKETS_COUNT);
+            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+            ps.setString(1, vehicleRegNumber);
+           // ps.execute();
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            count = rs.getInt("rowcount");
+            
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+        }catch (Exception ex){
+            logger.error("Error fetching next available slot",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+            System.out.println("count:" + count);
+            return count;
+        }
+    	
     }
 }
